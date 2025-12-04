@@ -4785,11 +4785,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6449296285419502213, guid: 66a0aba2ba55058439c92574558222ac, type: 3}
       propertyPath: m_margin.w
-      value: -17.078934
+      value: -5.985159
       objectReference: {fileID: 0}
     - target: {fileID: 6449296285419502213, guid: 66a0aba2ba55058439c92574558222ac, type: 3}
       propertyPath: m_margin.x
-      value: -131.44655
+      value: -115.72856
+      objectReference: {fileID: 0}
+    - target: {fileID: 6449296285419502213, guid: 66a0aba2ba55058439c92574558222ac, type: 3}
+      propertyPath: m_margin.y
+      value: -17.447443
+      objectReference: {fileID: 0}
+    - target: {fileID: 6449296285419502213, guid: 66a0aba2ba55058439c92574558222ac, type: 3}
+      propertyPath: m_margin.z
+      value: -143.02232
       objectReference: {fileID: 0}
     - target: {fileID: 6449296285419502213, guid: 66a0aba2ba55058439c92574558222ac, type: 3}
       propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
@@ -5088,7 +5096,7 @@ MonoBehaviour:
             m_IntArgument: 0
             m_FloatArgument: 0
             m_StringArgument: "For now take your rewards, capture kids and women
-              as your slaves. Kill the sick & elderly as they are harder to more\_and\_cannot\_work"
+              as your slaves. Kill the sick and elderly as they are harder to more\_and\_cannot\_work."
             m_BoolArgument: 0
           m_CallState: 2
 --- !u!114 &493431915
@@ -5105,6 +5113,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nameText: {fileID: 493431910}
   messageText: {fileID: 493431909}
+  typingSpeed: 0.03
 --- !u!1 &516322010
 GameObject:
   m_ObjectHideFlags: 0

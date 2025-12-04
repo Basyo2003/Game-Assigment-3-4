@@ -13,6 +13,10 @@ namespace StarterAssets
 		public bool jump;
 		public bool sprint;
 
+		// Allows external systems to temporarily disable all player input (e.g. during dialogue)
+		private bool _inputEnabled = true;
+		public bool InputEnabled => _inputEnabled;
+
 		[Header("Movement Settings")]
 		public bool analogMovement;
 
@@ -48,22 +52,35 @@ namespace StarterAssets
 
 		public void MoveInput(Vector2 newMoveDirection)
 		{
-			move = newMoveDirection;
+			move = _inputEnabled ? newMoveDirection : Vector2.zero;
 		} 
 
 		public void LookInput(Vector2 newLookDirection)
 		{
-			look = newLookDirection;
+			look = _inputEnabled ? newLookDirection : Vector2.zero;
 		}
 
 		public void JumpInput(bool newJumpState)
 		{
-			jump = newJumpState;
+			jump = _inputEnabled && newJumpState;
 		}
 
 		public void SprintInput(bool newSprintState)
 		{
-			sprint = newSprintState;
+			sprint = _inputEnabled && newSprintState;
+		}
+
+		public void SetInputEnabled(bool enabled)
+		{
+			_inputEnabled = enabled;
+
+			if (!enabled)
+			{
+				move = Vector2.zero;
+				look = Vector2.zero;
+				jump = false;
+				sprint = false;
+			}
 		}
 
 		private void OnApplicationFocus(bool hasFocus)
@@ -81,6 +98,8 @@ namespace StarterAssets
 		// This is intentionally permissive so the player can still move while debugging input issues.
 		private void Update()
 		{
+			if (!_inputEnabled) return;
+
 			// Read WASD / arrow keys
 			Vector2 kb = Vector2.zero;
 			if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) kb.y += 1f;
