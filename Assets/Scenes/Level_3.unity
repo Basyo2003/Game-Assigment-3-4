@@ -12422,7 +12422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9794f3424d0863a44910c05553d208d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loadingScreen: {fileID: 0}
+  loadingScreen: {fileID: 1729705355}
 --- !u!224 &1438167651
 RectTransform:
   m_ObjectHideFlags: 0
