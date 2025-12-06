@@ -6,6 +6,7 @@ public class MilestoneManager : MonoBehaviour
     [TextArea]
     public string[] milestones;       // List of steps you want to show
     public TextMeshProUGUI uiText;    // Assign your MilestoneText here
+    public System.Action OnAllMilestonesCompleted; // event callback
 
     private int currentMilestone = 0;
 
@@ -24,6 +25,8 @@ public class MilestoneManager : MonoBehaviour
         else
         {
             uiText.text = "All objectives completed!";
+            // 🔥 Trigger loading screen
+            OnAllMilestonesCompleted?.Invoke();
         }
     }
 
