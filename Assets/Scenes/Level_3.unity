@@ -17722,7 +17722,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreText: {fileID: 0}
-  scoreTMP: {fileID: 0}
+  scoreTMP: {fileID: 338256421}
   playerScore: 0
 --- !u!4 &1978645704
 Transform:
