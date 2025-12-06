@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using StarterAssets;
 
@@ -31,6 +32,13 @@ public class DialogueTrigger : MonoBehaviour
     public int milestoneIndex = -1;
     public MilestoneManager milestoneManager;
 
+    [Header("End Animation (Optional)")]
+    public bool playAnimationAfterDialogue = false;   // Trigger an animation when dialogue finishes
+    public string animationTriggerName = "Celebrate"; // Animator trigger to fire
+    public float animationHoldDuration = 0f;          // Time to keep player frozen after triggering
+    public bool waitForAnimationEvent = false;        // If true, wait for NotifyEndAnimationComplete
+    public Animator playerAnimator;                   // Animator controlling the player's animations
+
     private int currentIndex = 0;
     private bool dialogueActive = false;
     private bool playerInRange = false;
@@ -40,6 +48,8 @@ public class DialogueTrigger : MonoBehaviour
     private StarterAssetsInputs starterInputs;
     private ThirdPersonController thirdPersonController;
     private FirstPersonController firstPersonController;
+    private Coroutine delayedUnfreezeRoutine;
+    private bool awaitingAnimationCompletion = false;
 
     private bool starterInputsWereEnabled = true;
     private bool thirdPersonWasEnabled = true;
@@ -138,7 +148,8 @@ public class DialogueTrigger : MonoBehaviour
         currentIndex = 0;
 
         FreezePlayer();
-        dialogueUI.SetActive(true);
+        if (dialogueUI != null)
+            dialogueUI.SetActive(true);
 
         ShowCurrentLine();
     }
@@ -161,8 +172,11 @@ public class DialogueTrigger : MonoBehaviour
     private void ShowCurrentLine()
     {
         var line = lines[currentIndex];
-        dialogueController.SetSpeaker(line.speaker);
-        dialogueController.SetMessage(line.message);
+        if (dialogueController != null)
+        {
+            dialogueController.SetSpeaker(line.speaker);
+            dialogueController.SetMessage(line.message);
+        }
     }
 
 
@@ -170,11 +184,14 @@ public class DialogueTrigger : MonoBehaviour
     {
         dialogueActive = false;
 
-        UnfreezePlayer();
-        dialogueUI.SetActive(false);
+        if (dialogueController != null)
+        {
+            dialogueController.SetSpeaker("");
+            dialogueController.SetMessage("");
+        }
 
-        dialogueController.SetSpeaker("");
-        dialogueController.SetMessage("");
+        if (dialogueUI != null)
+            dialogueUI.SetActive(false);
 
         // Hide popup when dialogue ends (waits for next NPC)
         if (interactionPopup)
@@ -191,6 +208,32 @@ public class DialogueTrigger : MonoBehaviour
         {
             milestoneManager.CompleteMilestone();
         }
+
+        bool animationTriggered = TryPlayEndAnimation();
+
+        if (animationTriggered)
+        {
+            if (waitForAnimationEvent)
+            {
+                awaitingAnimationCompletion = true;
+            }
+            else if (animationHoldDuration > 0f)
+            {
+                awaitingAnimationCompletion = true;
+                if (delayedUnfreezeRoutine != null)
+                    StopCoroutine(delayedUnfreezeRoutine);
+
+                delayedUnfreezeRoutine = StartCoroutine(DelayedUnfreeze(animationHoldDuration));
+            }
+            else
+            {
+                UnfreezePlayer();
+            }
+        }
+        else
+        {
+            UnfreezePlayer();
+        }
     }
 
 
@@ -199,6 +242,14 @@ public class DialogueTrigger : MonoBehaviour
     // ============================================================
     private void FreezePlayer()
     {
+        awaitingAnimationCompletion = false;
+
+        if (delayedUnfreezeRoutine != null)
+        {
+            StopCoroutine(delayedUnfreezeRoutine);
+            delayedUnfreezeRoutine = null;
+        }
+
         if (playerMovement != null)
             playerMovement.FreezePlayer();
 
@@ -224,6 +275,8 @@ public class DialogueTrigger : MonoBehaviour
 
     private void UnfreezePlayer()
     {
+        awaitingAnimationCompletion = false;
+
         if (playerMovement != null)
             playerMovement.UnfreezePlayer();
 
@@ -256,5 +309,60 @@ public class DialogueTrigger : MonoBehaviour
 
         firstPersonController =
             player.GetComponentInChildren<FirstPersonController>();
+
+        if (playerAnimator == null)
+            playerAnimator = player.GetComponentInChildren<Animator>();
+    }
+
+
+    // ============================================================
+    // END-ANIMATION SUPPORT
+    // ============================================================
+    private bool TryPlayEndAnimation()
+    {
+        if (!playAnimationAfterDialogue)
+            return false;
+
+        if (playerAnimator == null)
+            CachePlayerComponents();
+
+        if (playerAnimator == null || string.IsNullOrWhiteSpace(animationTriggerName))
+            return false;
+
+        playerAnimator.SetTrigger(animationTriggerName);
+        return true;
+    }
+
+
+    private IEnumerator DelayedUnfreeze(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        delayedUnfreezeRoutine = null;
+        if (awaitingAnimationCompletion)
+        {
+            awaitingAnimationCompletion = false;
+            UnfreezePlayer();
+        }
+    }
+
+
+    /// <summary>
+    /// Optional hook for an animation event to signal the end-of-dialogue animation is complete.
+    /// Call this from the animation timeline when you want to return control to the player.
+    /// </summary>
+    public void NotifyEndAnimationComplete()
+    {
+        if (!awaitingAnimationCompletion)
+            return;
+
+        awaitingAnimationCompletion = false;
+
+        if (delayedUnfreezeRoutine != null)
+        {
+            StopCoroutine(delayedUnfreezeRoutine);
+            delayedUnfreezeRoutine = null;
+        }
+
+        UnfreezePlayer();
     }
 }

@@ -26,6 +26,7 @@ public class MilestoneManager : MonoBehaviour
         {
             uiText.text = "All objectives completed!";
             // 🔥 Trigger loading screen
+            //wait 
             OnAllMilestonesCompleted?.Invoke();
         }
     }
