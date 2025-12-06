@@ -14,6 +14,7 @@ public class DialogueTrigger : MonoBehaviour
     public GameObject dialogueUI;                     // The UI panel showing dialogue
     public Transform player;                          // Player transform
     public DialogueController dialogueController;     // Handles UI text
+    public GameObject npcToReveal;                    // Optional NPC to reveal after dialogue
 
     [Header("Shared Interaction Popup (One for ALL NPCs)")]
     public RectTransform interactionPopup;            // The global "Press M to talk" popup
@@ -178,6 +179,10 @@ public class DialogueTrigger : MonoBehaviour
         // Hide popup when dialogue ends (waits for next NPC)
         if (interactionPopup)
             interactionPopup.gameObject.SetActive(false);
+
+        // Reveal NPC if assigned
+        if (npcToReveal != null)
+            npcToReveal.SetActive(true);
 
         // Handle milestone
         if (milestoneIndex != -1 &&
